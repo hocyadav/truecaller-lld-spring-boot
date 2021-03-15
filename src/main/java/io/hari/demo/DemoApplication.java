@@ -4,6 +4,7 @@ import io.hari.demo.config.AppConfig;
 import io.hari.demo.constant.ContactStatus;
 import io.hari.demo.dao.ContactDao;
 import io.hari.demo.dao.GlobalContactDirectoryDao;
+import io.hari.demo.dao.NativeSQLInsert;
 import io.hari.demo.dao.UserDao;
 import io.hari.demo.entity.*;
 import io.hari.demo.service.ContactService;
@@ -14,8 +15,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SpringBootApplication
 public class DemoApplication implements CommandLineRunner {
@@ -37,6 +42,9 @@ public class DemoApplication implements CommandLineRunner {
     @Autowired
 	ContactService contactService;
 
+    @Autowired
+	NativeSQLInsert nativeSQLInsert;
+
     @Override
     public void run(String... args) throws Exception {
     	// todo DONE : create 2 contact and assign to one user
@@ -52,7 +60,7 @@ public class DemoApplication implements CommandLineRunner {
 
 		final User hariom_htc = userService.saveUser(User.builder().name("hariom htc")
 				.contacts(Arrays.asList(chandan, neha))
-				.build());
+				.build());//working 1 : M uni directional
 
 		//todo :DONE search by name, +ve and -ve test
 		final List<Contact> searchContactByName = userService.searchContactByName(hariom_htc, "neha");
@@ -127,5 +135,25 @@ public class DemoApplication implements CommandLineRunner {
 		contactService.reportSpam(hariom_htc, BigInteger.valueOf(495452L));
 		final GlobalContactDirectory spamContact = contactDirectoryDao.findByContactNum(BigInteger.valueOf(495452L));
 		System.out.println("spamContact = " + spamContact);
-	}
+
+		//todo : read file and create contact and save contact
+		final Stream<String> lines = Files.lines(Paths.get("file.txt"));
+		lines.forEach(i -> {
+			final String[] s = i.split(" ");
+			final String status = s[2];
+			final BigInteger phoneNum = BigInteger.valueOf(Long.valueOf(s[1]));
+			final Contact contact = Contact.builder().contactName(s[0])
+					.phoneNumberView(PhoneNumberView.builder().phoneNumbers(Arrays.asList(phoneNum)).build())
+					.status(ContactStatus.valueOf(status))
+					.build();
+			contactDao.save(contact);
+		});
+//		userDao.nativeInsertSQL();
+//		contactDao.nativeInsertSQL();
+
+//		nativeSQLInsert.insertWithQuery(Contact.builder().contactName("test em native").build());
+
+
+
+    }
 }
