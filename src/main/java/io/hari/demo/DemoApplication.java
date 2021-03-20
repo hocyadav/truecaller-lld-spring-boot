@@ -153,6 +153,7 @@ public class DemoApplication implements CommandLineRunner {
 
 //		nativeSQLInsert.insertWithQuery(Contact.builder().contactName("test em native").build());
 
+		contactService.printAll();
 
 
     }

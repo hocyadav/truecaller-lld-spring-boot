@@ -3,6 +3,7 @@ package io.hari.demo.service;
 import io.hari.demo.dao.BaseDao;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Author Hariom Yadav
@@ -25,6 +26,11 @@ public abstract class BaseService<T> {
 
     public T save(T entity) {
         return dao.save(entity);
+    }
+
+    public void printAll() {
+        System.out.println("--- Printing All data ---");
+        dao.findAll().stream().filter(Objects::nonNull).forEach(System.out::println);
     }
 
 }
